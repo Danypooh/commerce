@@ -1,3 +1,31 @@
 body {
-    padding: 10px;
+  padding: 10px;
+}
+
+.card {
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.card-img-top {
+  width: 100%;
+  height: auto; /* Adjust this as needed to maintain aspect ratio */
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.text-muted {
+  color: #6c757d;
 }
