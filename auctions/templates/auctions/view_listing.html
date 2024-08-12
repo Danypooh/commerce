@@ -1,0 +1,82 @@
+{% extends "auctions/layout.html" %} 
+
+{% block body %}
+    <h2>{{ listing.title }}</h2>
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    <br />
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card">
+            {% if listing.image %}
+            <img
+              class="card-img-top"
+              src="{{ listing.image.url }}"
+              alt="Listing Image"
+            />
+            {% else %}
+            <div
+              class="card-img-top bg-light d-flex justify-content-center align-items-center"
+              style="height: 200px"
+            >
+              <p class="text-muted">No Image Preview</p>
+            </div>
+            {% endif %}
+            <div class="card-body">
+              <p class="card-text">{{ listing.description }}</p>
+              <h3 class="card-text">${{ listing.starting_price }}</h3>
+            </div>
+          </div>
+          <br />
+          <div>
+            {% if user.is_authenticated and listing.seller == user %}
+                <form action="{% url 'view_listing' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" name="action" value="close_auction">Close Auction</button>
+                </form>
+            {% endif %}
+          </div>
+          <div class="container mt-5">
+            <div class="auction-details mb-4">
+                <p><strong>The auction ends:</strong> {{ listing.end_date }}</p>
+                <p><strong>Listed by:</strong> {{ listing.seller }}</p>
+                {% if number_of_bids > 0 %}
+                    <p><strong>{{ number_of_bids }}</strong> bid(s) so far</p>
+                    {% if highest_bid.bidder == user %}
+                        <p class="text-success">Your bid is the current bid</p>
+                    {% else %}
+                        <p><strong>The current bid is:</strong> ${{ highest_bid.bid_amount }}</p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-blue-warning">There are no current bids</p>
+                {% endif %}
+            </div>
+        
+            {% if user.is_authenticated %}
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <form action="{% url 'view_listing' listing.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="text" name="bid" class="form-control bid-input mb-2" placeholder="Bid">
+                        <button type="submit" class="btn btn-primary" name="action" value="place_bid">Place Bid</button>
+                    </form>
+                </div>
+            
+                <div>
+                    <form action="{% url 'view_listing' listing.id %}" method="post">
+                        {% csrf_token %}
+                        {% if item_in_watchlist %}
+                            <button type="submit" class="btn btn-danger" name="action" value="remove">Remove from Watchlist</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-success" name="action" value="add">Add to Watchlist</button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+
+{% endblock %}

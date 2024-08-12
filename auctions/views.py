@@ -1,10 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
+from django.contrib import messages
 
-from .models import User, Listing
+from .models import User, Listing, Watchlist, Comment, Bid
 from .forms import ListingForm
 
 
@@ -80,3 +82,64 @@ def new_listing(request):
         "form": form
     })
 
+def view_listing(request, listing_id):
+    listing = get_object_or_404(Listing, id=listing_id)
+    item_in_watchlist = Watchlist.objects.filter(user=request.user, listing=listing).exists()
+    highest_bid = Bid.objects.filter(auction_listing=listing).order_by('-bid_amount').first()
+    number_of_bids = listing.bids.count()
+    message = "Messages will be displayed here"
+
+    if request.method == "POST":
+        action = request.POST.get('action')
+        
+        if action == "add":
+            watchitem = Watchlist.objects.create(user=request.user, listing=listing)
+            watchitem.save()
+            item_in_watchlist = Watchlist.objects.filter(user=request.user, listing=listing).exists()
+            message = "Item added to watchlist"
+                 
+        elif action == "remove":
+            Watchlist.objects.filter(user=request.user, listing=listing).delete()
+            item_in_watchlist = Watchlist.objects.filter(user=request.user, listing=listing).exists()
+            message = "Item removed from watchlist"
+        
+        elif action == "place_bid":
+            bid_str = request.POST.get('bid')
+            if bid_str:
+                try:
+                    bid = float(bid_str)
+                    if bid > 0:
+                        if highest_bid is None and bid > listing.starting_price:
+                            new_bid = Bid.objects.create(auction_listing=listing, bidder=request.user, bid_amount=bid, bid_time=timezone.now())
+                            new_bid.save()
+                            message = "Bid placed successfully"  
+                            number_of_bids = listing.bids.count()
+                            highest_bid = Bid.objects.filter(auction_listing=listing).order_by('-bid_amount').first()
+                        elif highest_bid is not None and bid > highest_bid.bid_amount:
+                            new_bid = Bid.objects.create(auction_listing=listing, bidder=request.user, bid_amount=bid, bid_time=timezone.now())
+                            new_bid.save()
+                            message = "Bid placed successfully"  
+                            number_of_bids = listing.bids.count()
+                            highest_bid = Bid.objects.filter(auction_listing=listing).order_by('-bid_amount').first()
+                        else:
+                            message = "Your bid must be higher than the current bid/price"
+                    else:
+                        message = "Bid amount must be greater than zero"
+                except ValueError:
+                        message = f"Invalid bid amount { highest_bid }"
+        
+        return render(request, 'auctions/view_listing.html', {
+        'listing': listing,
+        "item_in_watchlist": item_in_watchlist,
+        "number_of_bids": number_of_bids,
+        "highest_bid": highest_bid,
+        "message": message
+    })       
+
+    return render(request, 'auctions/view_listing.html', {
+        'listing': listing,
+        "item_in_watchlist": item_in_watchlist,
+        "number_of_bids": number_of_bids,
+        "highest_bid": highest_bid,
+        "message": message
+    })
