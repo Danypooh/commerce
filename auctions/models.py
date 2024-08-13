@@ -13,6 +13,7 @@ class Listing(models.Model):
     image = models.ImageField(upload_to='images/', blank=True, null=True)
     end_date = models.DateTimeField()
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
+    status = models.BooleanField(default=True)
 
 class Bid(models.Model):
     auction_listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids")

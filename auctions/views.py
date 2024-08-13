@@ -88,6 +88,7 @@ def view_listing(request, listing_id):
     highest_bid = Bid.objects.filter(auction_listing=listing).order_by('-bid_amount').first()
     number_of_bids = listing.bids.count()
     message = "Messages will be displayed here"
+    comments = Comment.objects.filter(auction_listing=listing).order_by('-comment_time')
 
     if request.method == "POST":
         action = request.POST.get('action')
@@ -127,13 +128,26 @@ def view_listing(request, listing_id):
                         message = "Bid amount must be greater than zero"
                 except ValueError:
                         message = f"Invalid bid amount { highest_bid }"
+
+        elif action == "close_auction":
+            listing.status = False
+            listing.save()
+            message = "The auction is closed"
+        
+        elif action == "add_comment":
+            comment = request.POST.get('comment')
+            new_comment = Comment.objects.create(auction_listing=listing, commenter=request.user, comment_text=comment, comment_time=timezone.now())
+            new_comment.save()
+            message = "Comment added successfully"
+            comments = Comment.objects.filter(auction_listing=listing).order_by('-comment_time')
         
         return render(request, 'auctions/view_listing.html', {
         'listing': listing,
         "item_in_watchlist": item_in_watchlist,
         "number_of_bids": number_of_bids,
         "highest_bid": highest_bid,
-        "message": message
+        "message": message,
+        "comments": comments
     })       
 
     return render(request, 'auctions/view_listing.html', {
@@ -141,5 +155,6 @@ def view_listing(request, listing_id):
         "item_in_watchlist": item_in_watchlist,
         "number_of_bids": number_of_bids,
         "highest_bid": highest_bid,
-        "message": message
+        "message": message,
+        "comments": comments
     })
