@@ -1,5 +1,6 @@
 body {
   padding: 10px;
+  background-color: rgb(227, 218, 201);
 }
 
 .card {
@@ -26,6 +27,14 @@ body {
   padding: 20px;
 }
 
+.card-link {
+  color: #333;
+}
+
 .text-muted {
   color: #6c757d;
+}
+
+.text-blue-warning {
+  color: #007bff;
 }
