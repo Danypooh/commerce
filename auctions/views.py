@@ -158,3 +158,11 @@ def view_listing(request, listing_id):
         "message": message,
         "comments": comments
     })
+
+def watchlist(request):
+    user_id = request.user.id
+    user_watchlist = Watchlist.objects.filter(user=user_id)
+
+    return render(request, 'auctions/watchlist.html', {
+        "user_watchlist": user_watchlist
+    })
