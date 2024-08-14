@@ -12,7 +12,10 @@ urlpatterns = [
     path("register", views.register, name="register"),
     path("new_listing", views.new_listing, name="new_listing"),
     path("view_listing/<str:listing_id>", views.view_listing, name="view_listing"),
-    path("watchlist", views.watchlist, name="watchlist")
+    path("watchlist", views.watchlist, name="watchlist"),
+    path("categories", views.categories, name="categories"),
+    path("view_categorie/<str:categorie>", views.view_categorie, name="view_categorie"),
+    path("closed_listings", views.closed_listings, name="closed_listings")
 ]
 
 if settings.DEBUG:

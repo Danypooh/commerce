@@ -1,18 +1,17 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
-from django.contrib import messages
 
-from .models import User, Listing, Watchlist, Comment, Bid
+from .models import User, Listing, Watchlist, Comment, Bid, Categorie
 from .forms import ListingForm
 
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all()
+        "listings": Listing.objects.filter(status=True)
     })
 
 
@@ -165,4 +164,28 @@ def watchlist(request):
 
     return render(request, 'auctions/watchlist.html', {
         "user_watchlist": user_watchlist
+    })
+
+def categories(request):
+    categories = Categorie.objects.all()
+
+    return render(request, 'auctions/categories.html', {
+        "categories": categories
+    })
+
+def view_categorie(request, categorie):
+    categorie_name = get_object_or_404(Categorie, name=categorie)
+
+    listings = Listing.objects.filter(categorie=categorie_name, status=True)
+
+    return render(request, 'auctions/categorie.html', {
+        "categorie": categorie_name,
+        "listings": listings
+    })
+
+def closed_listings(request):
+    listings = Listing.objects.filter(status=False)
+
+    return render(request, 'auctions/closed_listings.html', {
+        "listings": listings
     })
